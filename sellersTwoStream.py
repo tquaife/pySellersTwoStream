@@ -82,11 +82,20 @@ class twoStream(leafGeometry,canopyStructure):
     #set up model parameters
     self.mu=1.0
     self.propDif=0.0
-    self.lai=5.0
     self.leaf_r=0.3
     self.leaf_t=0.2
     self.soil_r=0.1
+
+    self.lai=5.0
     self.nLayers=20
+    self.userLayerLAIMap=False
+    #intialise the layerMap here just 
+    #incase a user sets the flag to 
+    #True but forgets to provide a map
+    laiPerLayer=self.lai/self.nLayers
+    self.layerLAIMap=np.ones(self.nLayers)*laiPerLayer
+
+    
     
     self.setupJULES()
 
@@ -424,18 +433,33 @@ class twoStream(leafGeometry,canopyStructure):
     h9=(u2+muB*h)/(d2*s1)
     h10=-s1*(u2-muB*h)/d2
  
+        
+    #if not using a user generated lai map
+    #generate one here. We do it at this point
+    #so as to catch any changes to
+    if self.userLayerLAIMap==False:
+      laiPerLayer=self.lai/self.nLayers
+      self.layerLAIMap=np.ones(self.nLayers)*laiPerLayer
+    
+    #add a zero layer in (the top of the canopy)
+    #also make this a "local scope variable so this
+    #doesn't interfere with consecutive calls by adding in
+    #multiple zeros
+    layerLAIMapPrivate=np.hstack([0.0,self.layerLAIMap])
+
     #some arrays to hold output
-    Iup=np.zeros(self.nLayers+1)
-    Idn=np.zeros(self.nLayers+1)
-    Iab=np.zeros(self.nLayers+1)
-    Iab_dLai=np.zeros(self.nLayers+1)
-   
+    Iup=np.zeros(len(layerLAIMapPrivate))
+    Idn=np.zeros(len(layerLAIMapPrivate))
+    Iab=np.zeros(len(layerLAIMapPrivate))
+    Iab_dLai=np.zeros(len(layerLAIMapPrivate))
+
     #calculate fluxes at the top and bottom 
     #of each layer
-    laiPerLayer=self.lai/self.nLayers
-    for i in xrange(self.nLayers+1):
-  
-      laiSum=laiPerLayer*i
+    laiSum=0 
+    for i in xrange(len(layerLAIMapPrivate)):
+      
+      #keep track of total lai 
+      laiSum=laiSum+layerLAIMapPrivate[i]
   
       #fluxes due to collimated irradiance
       Iup_dir=h1*np.exp(-K*laiSum)/sigma + h2*np.exp(-h*laiSum) + h3*np.exp(h*laiSum)
@@ -470,14 +494,14 @@ class twoStream(leafGeometry,canopyStructure):
       #This is how fAPAR is calculated in JULES.
       
       if i>0:
-        lai=laiSum-laiPerLayer*.5
+        lai=laiSum-layerLAIMapPrivate[i]*.5
         dIup_dir_dLai=-K*h1/sigma*np.exp(-K*lai)-h*h2*np.exp(-h*lai)+h*h3*np.exp(h*lai)
         dIdn_dir_dLai=-K*(h4/sigma+1.)*np.exp(-K*lai)-h*h5*np.exp(-h*lai)+h*h6*np.exp(h*lai)
         dIup_dif_dLai=-h*h7*np.exp(-h*lai)+h*h8*np.exp(h*lai)
         dIdn_dif_dLai=-h*h9*np.exp(-h*lai)+h*h10*np.exp(h*lai)
              
-        Iab_dir_dLai=(dIup_dir_dLai-dIdn_dir_dLai)*laiPerLayer
-        Iab_dif_dLai=(dIup_dif_dLai-dIdn_dif_dLai)*laiPerLayer
+        Iab_dir_dLai=(dIup_dir_dLai-dIdn_dir_dLai)*layerLAIMapPrivate[i]
+        Iab_dif_dLai=(dIup_dif_dLai-dIdn_dif_dLai)*layerLAIMapPrivate[i]
 
       else:
         Iab_dir_dLai=0.0
