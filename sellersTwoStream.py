@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 Tristan Quaife
 tquaife@gmail.com
 """
+from __future__ import print_function
 import sys
 
 import numpy as np
@@ -150,7 +151,7 @@ class twoStream(leafGeometry,canopyStructure):
     Average inverse diffuse optical depth per unit leaf area
     calculated for an arbitrary G/GZ function 
     """
-    out=integrate.quadrature( self.__muBar_generic_integ,0,1,vec_func=False)
+    out=integrate.quad( self.__muBar_generic_integ,0,1)
     return out[0] 
     
   def __muBar_generic_integ(self,muDash):
@@ -185,7 +186,7 @@ class twoStream(leafGeometry,canopyStructure):
     elif self.JULES_lad=='horizontal':
       return 1.0
     else:
-      raise Exception, 'Unknown JULES leaf angle ditribution: '%self.JULES_lad
+      raise Exception('Unknown JULES leaf angle ditribution: '%self.JULES_lad)
 
 
   # ========================================
@@ -200,7 +201,7 @@ class twoStream(leafGeometry,canopyStructure):
     
     See eqn 5 & 7 of Sellers 1985
     """
-    out=integrate.quadrature( self.__volssa_generic_integ,0,1,vec_func=False)
+    out=integrate.quad( self.__volssa_generic_integ,0,1)
     return out[0]*(self.leaf_r+self.leaf_t)*0.5
 
     
@@ -248,7 +249,7 @@ class twoStream(leafGeometry,canopyStructure):
     elif self.JULES_lad=='horizontal':
       return w/4.
     else:
-      raise Exception, 'Unknown JULES leaf angle ditribution: '%self.JULES_lad
+      raise Exception('Unknown JULES leaf angle ditribution: '%self.JULES_lad)
 
 
 
@@ -350,7 +351,7 @@ class twoStream(leafGeometry,canopyStructure):
     elif self.JULES_lad=='horizontal':
       sqcost=1.0
     else:
-      raise Exception, 'Unknown JULES leaf angle ditribution: '%self.JULES_lad
+      raise Exception('Unknown JULES leaf angle ditribution: '%self.JULES_lad)
     
     return 0.5*(w+d*sqcost)/w
 
@@ -433,7 +434,7 @@ class twoStream(leafGeometry,canopyStructure):
     #calculate fluxes at the top and bottom 
     #of each layer
     laiPerLayer=self.lai/self.nLayers
-    for i in xrange(self.nLayers+1):
+    for i in range(self.nLayers+1):
   
       laiSum=laiPerLayer*i
   
@@ -497,7 +498,7 @@ class twoStream(leafGeometry,canopyStructure):
 if __name__=="__main__":
 
   def test():
-    print >> sys.stderr, "Write a test function!"
+    print("Write a test function!", file=sys.stderr)
 
   test()
   
