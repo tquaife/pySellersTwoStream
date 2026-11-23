@@ -153,7 +153,7 @@ class leafGeometry( ):
     elif self.JULES_lad=='horizontal':
       return self.G_horizontal(mu)
     else:
-      raise Exception, 'Unknown JULES leaf angle ditribution: '%self.JULES_lad
+      raise Exception('Unknown JULES leaf angle ditribution: '%self.JULES_lad)
       
       
       
@@ -169,7 +169,7 @@ class leafGeometry( ):
     """
   
     if self.CLM_chiL < -1.0 or self.CLM_chiL > 1.0:
-      raise Exception, "parameter chiL out of range: "%self.CLM_chiL
+      raise Exception("parameter chiL out of range: "%self.CLM_chiL)
 
     return self.CLM_phi1()+self.CLM_phi2()*mu
 
@@ -202,7 +202,7 @@ def test_GFunctions( ):
     l.gDash=GFuncs[func]
     x=[]
     y=[]
-    for theta in xrange(0,90,2):
+    for theta in range(0,90,2):
       mu=np.cos(np.deg2rad(theta))
       x.append(theta)
       y.append(l.G_integ_gDash(mu))
@@ -230,7 +230,7 @@ def test_gFunctions( ):
   
     x=[]
     y=[]
-    for theta in xrange(0,90,2):
+    for theta in range(0,90,2):
       mu=np.cos(np.deg2rad(theta))
       x.append(theta)
       y.append(GFuncs[func](mu))
